@@ -23,3 +23,5 @@ tzdata==2025.2
 urllib3==2.5.0
 beautifulsoup4
 lxml
+pandas
+requests
