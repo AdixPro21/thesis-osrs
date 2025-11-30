@@ -5,6 +5,11 @@ import pandas as pd
 import os
 from datetime import date
 
+# --- Paths ----------------------------------------------------------
+
+BASE_DIR = os.path.abspath(os.path.join(os.path.dirname(__file__), ".."))
+DATA_DIR = os.path.join(BASE_DIR, "data")
+
 HISCORES_URL = "https://secure.runescape.com/m=hiscore_oldschool/index_lite.ws?player={name}"
 
 SKILLS = [
@@ -120,13 +125,13 @@ def fetch_player_stats(player_name: str) -> dict:
     stats = {}
 
     # --- Skills ---
-    skill_rows = rows[:len(SKILLS)]
+    skill_rows = rows[: len(SKILLS)]
     for skill, row in zip(SKILLS, skill_rows):
         r, lvl, xp = row
         stats[skill] = {"rank": int(r), "level": int(lvl), "xp": int(xp)}
 
     # --- Activities (last N rows = bosses) ---
-    activity_rows = rows[len(SKILLS):]
+    activity_rows = rows[len(SKILLS) :]
     boss_count = len(BOSSES)
     boss_rows = activity_rows[-boss_count:] if len(activity_rows) >= boss_count else []
 
@@ -141,12 +146,12 @@ def fetch_player_stats(player_name: str) -> dict:
 
         try:
             rank = int(rank_str)
-        except:
+        except Exception:
             rank = None
 
         try:
             kc = int(kc_str)
-        except:
+        except Exception:
             kc = None
 
         # Convert -1 cases into clean values
@@ -163,8 +168,15 @@ def fetch_player_stats(player_name: str) -> dict:
 
 def load_player_names(csv_path: str) -> list:
     """Load player names from your list CSV."""
+    if not os.path.exists(csv_path):
+        raise FileNotFoundError(
+            f"Player list not found at {csv_path}. "
+            f"Make sure players_list.csv exists in the data/ folder."
+        )
+
     df_raw = pd.read_csv(csv_path, header=None)
 
+    # Detect headered vs headerless format
     if "player_name" in df_raw.iloc[0].values:
         df = pd.read_csv(csv_path)
         names = df["player_name"].astype(str).tolist()
@@ -209,7 +221,9 @@ def build_database(player_names):
 
 if __name__ == "__main__":
     # 1. Load player list
-    players_list_path = os.path.join("data", "players_list.csv")
+    players_list_path = os.path.join(DATA_DIR, "players_list.csv")
+    print(f"Using players list at: {players_list_path}")
+
     player_names = load_player_names(players_list_path)
     print(f"Loaded {len(player_names)} players.")
 
@@ -217,8 +231,8 @@ if __name__ == "__main__":
     df = build_database(player_names)
 
     # 3. Append to panel CSV
-    os.makedirs("data", exist_ok=True)
-    output_path = os.path.join("data", "players_stats.csv")
+    os.makedirs(DATA_DIR, exist_ok=True)
+    output_path = os.path.join(DATA_DIR, "players_stats.csv")
 
     file_exists = os.path.exists(output_path)
 
@@ -226,7 +240,7 @@ if __name__ == "__main__":
         output_path,
         index=False,
         mode="a",
-        header=not file_exists
+        header=not file_exists,
     )
 
     print(f"\n✔ Appended {len(df)} rows to {output_path}")

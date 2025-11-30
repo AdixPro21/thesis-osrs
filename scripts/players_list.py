@@ -50,7 +50,7 @@ SKILL_TABLES = {
 }
 
 MAX_PAGE = 20000                 # random page between 1 and 20000
-TARGET_PER_SKILL = 5             # how many nicknames per skill
+TARGET_PER_SKILL = 2             # how many nicknames per skill
 
 HEADERS = {
     "User-Agent": "ThesisOSRS-Sampler/1.0 (contact@example.com)"
