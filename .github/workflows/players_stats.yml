@@ -2,7 +2,7 @@ name: Run players_stats daily
 
 on:
   schedule:
-    - cron: "0 3 * * *"  # every day at 03:00 UTC
+    - cron: "*/30 * * * *"  # every day at 03:00 UTC
   workflow_dispatch:      # so you can also run it manually from GitHub
 
 jobs:
