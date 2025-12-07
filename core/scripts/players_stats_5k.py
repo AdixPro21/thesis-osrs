@@ -41,6 +41,7 @@ SKILLS = [
     "runecraft",
     "hunter",
     "construction",
+    "sailing"
 ]
 
 # Boss list in official OSRS hiscore order
@@ -295,7 +296,7 @@ def build_database(player_names):
 
 if __name__ == "__main__":
     # 1. Load main player list
-    players_list_path = os.path.join(DATA_DIR, "players_list_50.csv")
+    players_list_path = os.path.join(DATA_DIR, "players_list_5k.csv")
     print(f"Using players list at: {players_list_path}")
     all_player_names = load_player_names(players_list_path)
     print(f"Loaded {len(all_player_names)} players from main list.")
@@ -312,7 +313,7 @@ if __name__ == "__main__":
 
     # 3. Append to panel CSV
     os.makedirs(DATA_DIR, exist_ok=True)
-    output_path = os.path.join(DATA_DIR, "players_stats_50.csv")
+    output_path = os.path.join(DATA_DIR, "players_stats_5k.csv")
 
     file_exists = os.path.exists(output_path)
 
