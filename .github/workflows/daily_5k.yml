@@ -36,11 +36,11 @@ jobs:
           git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
 
           # Check if anything in data/ changed
-          if [ -n "$(git status --porcelain data)" ]; then
-            echo "Changes detected in data/, committing..."
-            git add data
+          if [ -n "$(git status --porcelain core/data)" ]; then
+            echo "Changes detected in core/data/, committing..."
+            git add core/data
             git commit -m "Update data from players_stats.py [skip ci]" || echo "Nothing to commit"
             git push
           else
-            echo "No changes in data/ directory."
+            echo "No changes in core/data/ directory."
           fi
