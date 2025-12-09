@@ -2,7 +2,7 @@ name: Run daily_5k daily
 
 on:
   schedule:
-    - cron: "0 3 * * *"  # every day at 03:00 UTC
+    - cron: "0 13 * * *"  # every day at 13:00 UTC
   workflow_dispatch:      # so you can also run it manually from GitHub
 
 jobs:
