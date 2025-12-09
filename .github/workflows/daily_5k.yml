@@ -14,6 +14,9 @@ jobs:
     steps:
       - name: Check out repo
         uses: actions/checkout@v4
+        with:
+          fetch-depth: 0 #get full history so we can pull/rebace
+          ref: main #make sure we're on main
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -40,7 +43,15 @@ jobs:
             echo "Changes detected in core/data/, committing..."
             git add core/data
             git commit -m "Update data from players_stats.py [skip ci]" || echo "Nothing to commit"
-            git push
+
+            echo "Fetching latest main frmo origin..."
+            git fetch origin main
+
+            echo "Rebasing on top of origin/main..."
+            git pull --rebase origin main
+
+            echo "Pushing changes to origin/main..."
+            git push origin HEAD:main
           else
             echo "No changes in core/data/ directory."
           fi
