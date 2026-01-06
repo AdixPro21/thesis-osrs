@@ -2,21 +2,18 @@ name: Run daily_5k daily
 
 on:
   schedule:
-    - cron: "0 13 * * *"  # every day at 13:00 UTC
-  workflow_dispatch:      # so you can also run it manually from GitHub
+    - cron: "0 3 * * *"  # every day at 03:00 UTC
+  workflow_dispatch:
 
 jobs:
   run-script:
     runs-on: ubuntu-latest
     permissions:
-      contents: write   # allow this job to push commits back to the repo
+      contents: write
 
     steps:
       - name: Check out repo
         uses: actions/checkout@v4
-        with:
-          fetch-depth: 0 #get full history so we can pull/rebace
-          ref: main #make sure we're on main
 
       - name: Set up Python
         uses: actions/setup-python@v5
@@ -28,30 +25,23 @@ jobs:
           python -m pip install --upgrade pip
           pip install -r requirements.txt
 
+      - name: Download latest dataset from GitHub Release (if exists)
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+        run: |
+          set -e
+          mkdir -p core/data
+          gh release download dataset-latest -p "players_stats_5k.csv" -D core/data || echo "No previous dataset found (first run)."
+
       - name: Run players_stats.py
         run: |
           python core/scripts/players_stats_5k.py
 
-      - name: Commit and push updated data
+      - name: Upload updated dataset to GitHub Release
         if: github.ref == 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
-          git config user.name "github-actions[bot]"
-          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
-
-          # Check if anything in data/ changed
-          if [ -n "$(git status --porcelain core/data)" ]; then
-            echo "Changes detected in core/data/, committing..."
-            git add core/data
-            git commit -m "Update data from players_stats.py [skip ci]" || echo "Nothing to commit"
-
-            echo "Fetching latest main frmo origin..."
-            git fetch origin main
-
-            echo "Rebasing on top of origin/main..."
-            git pull --rebase origin main
-
-            echo "Pushing changes to origin/main..."
-            git push origin HEAD:main
-          else
-            echo "No changes in core/data/ directory."
-          fi
+          set -e
+          gh release view dataset-latest >/dev/null 2>&1 || gh release create dataset-latest -t "Dataset (latest)" -n "Auto-updated by GitHub Actions."
+          gh release upload dataset-latest core/data/players_stats_5k.csv --clobber
